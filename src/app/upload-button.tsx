@@ -29,6 +29,7 @@ import { z } from "zod";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
+import { Doc } from "../../convex/_generated/dataModel";
 
 const formSchema = z.object({
   title: z.string().min(1).max(200),
@@ -56,17 +57,26 @@ export default function UploadButton() {
     console.log(orgId);
     if (!orgId) return;
     const postUrl = await generateUploadUrl();
+    const filetype = values.file[0].type;
+    console.log(filetype);
     const result = await fetch(postUrl, {
       method: "POST",
-      headers: { "Content-Type": values.file[0].type },
+      headers: { "Content-Type": filetype },
       body: values.file[0],
     });
     const { storageId } = await result.json();
+    const types = {
+      "image/png": "image",
+      "image/jpeg": "image",
+      "application/pdf": "pdf",
+      "text/csv": "csv",
+    } as Record<string, Doc<"files">["type"]>;
     try {
       await createFile({
         name: values.title,
         fileId: storageId,
         orgId,
+        type: types[filetype],
       });
       form.reset();
       setIsFileDialogOpen(false);

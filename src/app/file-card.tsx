@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import {
   Card,
   CardContent,
@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Doc } from "../../convex/_generated/dataModel";
+import { Doc, Id } from "../../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,10 +28,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { MoreVertical, TrashIcon } from "lucide-react";
-import { useMutation } from "convex/react";
+import {
+  FileTextIcon,
+  GanttChartIcon,
+  ImageIcon,
+  MoreVertical,
+  TextIcon,
+  TrashIcon,
+} from "lucide-react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
+import Image from "next/image";
 
 function FileCardActions({ file }: { file: Doc<"files"> }) {
   const deleteFile = useMutation(api.files.deleteFile);
@@ -90,22 +98,49 @@ function FileCardActions({ file }: { file: Doc<"files"> }) {
     </>
   );
 }
+function getFileUrl(fileId: Id<"_storage">): string {
+  console.log(`${process.env.NEXT_PUBLIC_CONVEX_URL}/api/storage/${fileId}`);
+  return `${process.env.NEXT_PUBLIC_CONVEX_URL}/api/storage/${fileId}`;
+}
 
 export default function FileCard({ file }: { file: Doc<"files"> }) {
+  const typeIcons = {
+    image: <ImageIcon />,
+    pdf: <FileTextIcon />,
+    csv: <TextIcon />,
+  } as Record<Doc<"files">["type"], ReactNode>;
+  const fileUrl = useQuery(api.files.getImageUrl, {
+    fileId: file.fileId,
+    type: file.type,
+  });
   return (
     <Card>
       <CardHeader className="relative">
-        <CardTitle>{file.name}</CardTitle>
+        <CardTitle className="flex gap-2 items-center">
+          <div className=" ">{typeIcons[file.type]}</div>
+          {file.name}
+        </CardTitle>
         <div className="absolute right-2 top-3">
           <FileCardActions file={file} />
         </div>
         {/* <CardDescription>Card Description</CardDescription> */}
       </CardHeader>
-      <CardContent>
-        <p>Card Content</p>
+      <CardContent className="h-[200px] flex items-center justify-center">
+        {file.type == "csv" && <TextIcon className="h-20 w-20" />}
+        {file.type == "pdf" && <FileTextIcon className="h-20 w-20" />}
+        {file.type == "image" && fileUrl && (
+          <Image alt={file.name} src={fileUrl} width="208" height="208" />
+        )}
       </CardContent>
-      <CardFooter>
-        <Button>Download</Button>
+      <CardFooter className="flex justify-center">
+        <Button
+          onClick={() => {
+            // open a new tab to the file location on convex
+            if (fileUrl) window.open(fileUrl, "_blank");
+          }}
+        >
+          Download
+        </Button>
       </CardFooter>
     </Card>
   );
