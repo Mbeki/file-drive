@@ -17,10 +17,13 @@ import FileCard from "./file-card";
 export default function FileBrowser({
   title,
   favoritesOnly,
+  deletedOnly,
 }: {
   title: string;
   favoritesOnly?: boolean;
+  deletedOnly?: boolean;
 }) {
+  console.log(title, favoritesOnly);
   const organization = useOrganization();
   const user = useUser();
   const [query, setQuery] = useState("");
@@ -36,8 +39,9 @@ export default function FileBrowser({
 
   const files = useQuery(
     api.files.getFiles,
-    orgId ? { orgId, query, favorites: favoritesOnly } : "skip"
+    orgId ? { orgId, query, favorites: favoritesOnly, deletedOnly } : "skip"
   );
+  console.log(files);
   const isLoading = files === undefined;
 
   return (

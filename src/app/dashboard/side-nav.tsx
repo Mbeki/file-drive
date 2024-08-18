@@ -1,7 +1,7 @@
 "use client";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { FileIcon, StarIcon } from "lucide-react";
+import { FileIcon, StarIcon, TrashIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
@@ -10,7 +10,7 @@ export default function SideNav() {
   const pathname = usePathname();
   console.log(pathname);
   return (
-    <div className="w-40 flex flex-col justify-start items-start gap-4">
+    <div className="w-40 flex flex-col justify-start items-start gap-8 mt-4">
       <Link
         className={cn("flex gap-2", {
           "text-blue-500": pathname.includes("/dashboard/files"),
@@ -24,10 +24,19 @@ export default function SideNav() {
         className={cn("flex gap-2", {
           "text-blue-500": pathname.includes("/dashboard/favorites"),
         })}
-        href="/dashboard/favorites"
+        href="/dashboard/trash"
       >
         <StarIcon />
         Favorites
+      </Link>
+      <Link
+        className={cn("flex gap-2", {
+          "text-blue-500": pathname.includes("/dashboard/trash"),
+        })}
+        href="/dashboard/trash"
+      >
+        <TrashIcon />
+        Trash
       </Link>
     </div>
   );
