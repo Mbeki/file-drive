@@ -8,7 +8,7 @@ import { useOrganization } from "@clerk/nextjs";
 export default function FavoritesPage() {
   return (
     <div>
-      <FileBrowser title="Your Favorites" favorites={true} />
+      <FileBrowser title="Your Favorites" favoritesOnly={true} />
     </div>
   );
 }

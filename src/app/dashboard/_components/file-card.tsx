@@ -41,8 +41,15 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
-function FileCardActions({ file }: { file: Doc<"files"> }) {
+function FileCardActions({
+  file,
+  isFavorited,
+}: {
+  file: Doc<"files">;
+  isFavorited: boolean;
+}) {
   const deleteFile = useMutation(api.files.deleteFile);
   const toggleFavorite = useMutation(api.files.toggleFavorite);
   const { toast } = useToast();
@@ -95,7 +102,10 @@ function FileCardActions({ file }: { file: Doc<"files"> }) {
               toggleFavorite({ fileId: file._id });
             }}
           >
-            <StarIcon className="w-4 h-4" /> Favorite
+            <StarIcon
+              className={cn("w-4 h-4", { "text-red-500": isFavorited })}
+            />{" "}
+            {isFavorited ? "Unfavorite" : "Favorite"}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -114,7 +124,13 @@ function getFileUrl(fileId: Id<"_storage">): string {
   return `${process.env.NEXT_PUBLIC_CONVEX_URL}/api/storage/${fileId}`;
 }
 
-export default function FileCard({ file }: { file: Doc<"files"> }) {
+export default function FileCard({
+  file,
+  favorites,
+}: {
+  file: Doc<"files">;
+  favorites: Doc<"favorites">[];
+}) {
   const typeIcons = {
     image: <ImageIcon />,
     pdf: <FileTextIcon />,
@@ -124,6 +140,10 @@ export default function FileCard({ file }: { file: Doc<"files"> }) {
     fileId: file.fileId,
     type: file.type,
   });
+  const isFavorited = favorites.some(
+    (favorite) => favorite.fileId === file._id
+  );
+
   return (
     <Card>
       <CardHeader className="relative">
@@ -132,7 +152,7 @@ export default function FileCard({ file }: { file: Doc<"files"> }) {
           {file.name}
         </CardTitle>
         <div className="absolute right-2 top-3">
-          <FileCardActions file={file} />
+          <FileCardActions file={file} isFavorited={isFavorited} />
         </div>
         {/* <CardDescription>Card Description</CardDescription> */}
       </CardHeader>

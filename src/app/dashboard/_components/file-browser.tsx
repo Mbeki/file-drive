@@ -16,10 +16,10 @@ import FileCard from "./file-card";
 
 export default function FileBrowser({
   title,
-  favorites,
+  favoritesOnly,
 }: {
   title: string;
-  favorites?: boolean;
+  favoritesOnly?: boolean;
 }) {
   const organization = useOrganization();
   const user = useUser();
@@ -29,10 +29,14 @@ export default function FileBrowser({
   if (organization.isLoaded && user.isLoaded) {
     orgId = organization?.organization?.id ?? user.user?.id;
   }
+  const favorites = useQuery(
+    api.files.getAllFavorites,
+    orgId ? { orgId } : "skip"
+  );
 
   const files = useQuery(
     api.files.getFiles,
-    orgId ? { orgId, query, favorites } : "skip"
+    orgId ? { orgId, query, favorites: favoritesOnly } : "skip"
   );
   const isLoading = files === undefined;
 
@@ -57,7 +61,13 @@ export default function FileBrowser({
             {files.length > 0 && (
               <div className="grid grid-cols-3 gap-4 mb-8">
                 {files?.map((file) => {
-                  return <FileCard key={file._id} file={file} />;
+                  return (
+                    <FileCard
+                      favorites={favorites ?? []}
+                      key={file._id}
+                      file={file}
+                    />
+                  );
                 })}
               </div>
             )}
