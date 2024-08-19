@@ -24,7 +24,7 @@ export default function SideNav() {
         className={cn("flex gap-2", {
           "text-blue-500": pathname.includes("/dashboard/favorites"),
         })}
-        href="/dashboard/trash"
+        href="/dashboard/favorites"
       >
         <StarIcon />
         Favorites
