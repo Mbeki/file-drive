@@ -97,3 +97,20 @@ export const getUserProfile = query({
     };
   },
 });
+
+export const getMe = query({
+  args: {},
+  async handler(ctx) {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new ConvexError("you must be logged in to upload a file");
+    }
+
+    const user = await getUser(ctx, identity.tokenIdentifier);
+    if (!user) {
+      return null;
+    }
+    return user;
+  },
+});

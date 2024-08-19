@@ -42,6 +42,7 @@ export default function FileCardActions({
   const deleteFile = useMutation(api.files.deleteFile);
   const restoreFile = useMutation(api.files.restoreFile);
   const toggleFavorite = useMutation(api.files.toggleFavorite);
+  const me = useQuery(api.users.getMe);
 
   const { toast } = useToast();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -113,7 +114,16 @@ export default function FileCardActions({
             {file.isFavorited ? "Unfavorite" : "Favorite"}
           </DropdownMenuItem>
 
-          <Protect role="org:admin" fallback={<></>}>
+          <Protect
+            condition={(check) => {
+              return (
+                check({
+                  role: "org:admin",
+                }) || file.userId === me?._id
+              );
+            }}
+            fallback={<></>}
+          >
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="cursor-pointer"
